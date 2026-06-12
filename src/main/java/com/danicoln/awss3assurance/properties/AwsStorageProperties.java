@@ -1,0 +1,34 @@
+package com.danicoln.awss3assurance.properties;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties(prefix = "app.aws")
+public class AwsStorageProperties {
+
+    private String region = "us-east-2";
+    private final S3Properties s3 = new S3Properties();
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public S3Properties getS3() {
+        return s3;
+    }
+
+    public static class S3Properties {
+        private String bucket = "";
+
+        public String getBucket() {
+            return bucket;
+        }
+
+        public void setBucket(String bucket) {
+            this.bucket = bucket;
+        }
+    }
+}
