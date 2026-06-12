@@ -1,6 +1,8 @@
 package com.danicoln.awss3assurance.service;
 
 import com.danicoln.awss3assurance.properties.AwsStorageProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseInputStream;
@@ -23,6 +25,8 @@ import java.util.List;
 @Service
 public class S3Service {
 
+    private static final Logger log = LoggerFactory.getLogger(S3Service.class);
+
     private final S3Client s3Client;
     private final AwsStorageProperties properties;
 
@@ -35,23 +39,29 @@ public class S3Service {
         String key = (prefix == null || prefix.isBlank())
                 ? file.getOriginalFilename()
                 : normalizePrefix(prefix) + file.getOriginalFilename();
+        String bucket = bucket();
 
         PutObjectRequest request = PutObjectRequest.builder()
-                .bucket(bucket())
+                .bucket(bucket)
                 .key(key)
                 .contentType(file.getContentType())
                 .build();
 
         s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+        log.info("S3 upload completed: bucket={}, key={}, size={} bytes",
+                bucket,
+                key,
+                file.getSize());
     }
 
     public ListResult list(String prefix) {
         String normalized = (prefix == null || prefix.isBlank())
                 ? ""
                 : normalizePrefix(prefix);
+        String bucket = bucket();
 
         ListObjectsV2Request request = ListObjectsV2Request.builder()
-                .bucket(bucket())
+                .bucket(bucket)
                 .prefix(normalized)
                 .delimiter("/")
                 .build();
@@ -70,25 +80,39 @@ public class S3Service {
             }
         }
 
+        log.info("S3 list completed: bucket={}, prefix='{}', folders={}, files={}",
+                bucket,
+                normalized,
+                folders.size(),
+                files.size());
+
         return new ListResult(folders, files);
     }
 
     public ResponseInputStream<GetObjectResponse> getFile(String key) {
+        String bucket = bucket();
         GetObjectRequest request = GetObjectRequest.builder()
-                .bucket(bucket())
+                .bucket(bucket)
                 .key(key)
                 .build();
 
+        log.info("S3 download requested: bucket={}, key={}", bucket, key);
         return s3Client.getObject(request);
     }
 
     public HeadObjectResponse getMetadata(String key) {
+        String bucket = bucket();
         HeadObjectRequest request = HeadObjectRequest.builder()
-                .bucket(bucket())
+                .bucket(bucket)
                 .key(key)
                 .build();
 
-        return s3Client.headObject(request);
+        HeadObjectResponse response = s3Client.headObject(request);
+        log.info("S3 metadata retrieved: bucket={}, key={}, size={} bytes",
+                bucket,
+                key,
+                response.contentLength());
+        return response;
     }
 
     private String bucket() {
