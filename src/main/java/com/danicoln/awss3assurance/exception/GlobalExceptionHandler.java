@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
@@ -13,6 +14,21 @@ import java.time.Instant;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException exception) {
+        return build(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleConflict(ResourceConflictException exception) {
+        return build(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
+        return build(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
     @ExceptionHandler(NoSuchKeyException.class)
     public ResponseEntity<ApiErrorResponse> handleNoSuchKey(NoSuchKeyException exception) {
         return build(HttpStatus.NOT_FOUND, exception.getMessage());
@@ -20,6 +36,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(S3Exception.class)
     public ResponseEntity<ApiErrorResponse> handleS3Exception(S3Exception exception) {
+        return build(HttpStatus.BAD_GATEWAY, exception.awsErrorDetails() != null
+                ? exception.awsErrorDetails().errorMessage()
+                : exception.getMessage());
+    }
+
+    @ExceptionHandler(DynamoDbException.class)
+    public ResponseEntity<ApiErrorResponse> handleDynamoDbException(DynamoDbException exception) {
         return build(HttpStatus.BAD_GATEWAY, exception.awsErrorDetails() != null
                 ? exception.awsErrorDetails().errorMessage()
                 : exception.getMessage());
