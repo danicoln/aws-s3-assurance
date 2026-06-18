@@ -11,7 +11,8 @@ Spring Boot API focused on S3 file operations with AWS SDK for Java v2 and suppo
 - inspect object metadata
 - CRUD de usuarios em PostgreSQL/RDS com propriedades `id` e `nome`
 - envio basico de mensagens para SQS
-- fluxo assíncrono de CEP com RDS + SQS
+- publicacao e inscricao basica em SNS
+- fluxo assincrono de CEP com RDS + SQS
 - configuration through environment variables instead of hardcoded account values
 
 ## Stack
@@ -19,7 +20,7 @@ Spring Boot API focused on S3 file operations with AWS SDK for Java v2 and suppo
 - Java 21
 - Spring Boot 3.5
 - Maven Wrapper
-- AWS SDK v2 (`s3` and `signin`)
+- AWS SDK v2 (`s3`, `sqs`, `sns`, `dynamodb` e `signin`)
 
 ## Configuration
 
@@ -29,6 +30,7 @@ Set these environment variables before running:
 $env:AWS_REGION="us-east-2"
 $env:AWS_S3_BUCKET="your-bucket-name"
 $env:AWS_SQS_QUEUE_URL="https://sqs.us-east-2.amazonaws.com/123456789012/your-queue"
+$env:AWS_SNS_TOPIC_ARN="arn:aws:sns:us-east-2:826917684746:assurance-sns"
 $env:SPRING_DATASOURCE_URL="jdbc:postgresql://database-1.cja44802coa4.us-east-2.rds.amazonaws.com:5432/postgres"
 $env:SPRING_DATASOURCE_USERNAME="postgres"
 $env:SPRING_DATASOURCE_PASSWORD="your-password"
@@ -61,6 +63,11 @@ http://localhost:8080
 - `GET /s3/file?key=folder/file.txt`
 - `GET /s3/metadata?key=folder/file.txt`
 - `POST /sqs/messages`
+- `POST /sns/publish`
+- `POST /sns/subscribe`
+- `POST /sns/subscribe-app`
+- `POST /sns/sms`
+- `POST /sns/receiver`
 - `GET /ceps`
 - `GET /ceps/{procedureId}`
 - `POST /ceps`
@@ -93,6 +100,18 @@ Send SQS message:
 
 ```powershell
 curl.exe -X POST "http://localhost:8080/sqs/messages" -H "Content-Type: application/json" -d "{\"messageBody\":\"{\\\"procedureId\\\":\\\"123\\\",\\\"cep\\\":\\\"30140071\\\"}\"}"
+```
+
+Publish SNS message:
+
+```powershell
+curl.exe -X POST "http://localhost:8080/sns/publish" -H "Content-Type: application/json" -d "{\"message\":\"Assurance notification\",\"subject\":\"Assurance SNS\"}"
+```
+
+Subscribe email to SNS topic:
+
+```powershell
+curl.exe -X POST "http://localhost:8080/sns/subscribe" -H "Content-Type: application/json" -d "{\"email\":\"user@example.com\"}"
 ```
 
 Create CEP request:

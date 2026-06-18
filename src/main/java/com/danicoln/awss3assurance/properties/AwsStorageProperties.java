@@ -9,6 +9,7 @@ public class AwsStorageProperties {
     private final S3Properties s3 = new S3Properties();
     private final DynamoDbProperties dynamodb = new DynamoDbProperties();
     private final SqsProperties sqs = new SqsProperties();
+    private final SnsProperties sns = new SnsProperties();
 
     public String getRegion() {
         return region;
@@ -28,6 +29,10 @@ public class AwsStorageProperties {
 
     public SqsProperties getSqs() {
         return sqs;
+    }
+
+    public SnsProperties getSns() {
+        return sns;
     }
 
     public static class S3Properties {
@@ -63,6 +68,18 @@ public class AwsStorageProperties {
 
         public void setQueueUrl(String queueUrl) {
             this.queueUrl = queueUrl;
+        }
+    }
+
+    public static class SnsProperties {
+        private String topicArn = "arn:aws:sns:us-east-2:826917684746:assurance-sns";
+
+        public String getTopicArn() {
+            return topicArn;
+        }
+
+        public void setTopicArn(String topicArn) {
+            this.topicArn = topicArn;
         }
     }
 }

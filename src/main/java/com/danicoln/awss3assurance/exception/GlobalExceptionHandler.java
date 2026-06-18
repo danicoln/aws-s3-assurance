@@ -8,6 +8,7 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.sns.model.SnsException;
 
 import java.time.Instant;
 
@@ -43,6 +44,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DynamoDbException.class)
     public ResponseEntity<ApiErrorResponse> handleDynamoDbException(DynamoDbException exception) {
+        return build(HttpStatus.BAD_GATEWAY, exception.awsErrorDetails() != null
+                ? exception.awsErrorDetails().errorMessage()
+                : exception.getMessage());
+    }
+
+    @ExceptionHandler(SnsException.class)
+    public ResponseEntity<ApiErrorResponse> handleSnsException(SnsException exception) {
         return build(HttpStatus.BAD_GATEWAY, exception.awsErrorDetails() != null
                 ? exception.awsErrorDetails().errorMessage()
                 : exception.getMessage());
