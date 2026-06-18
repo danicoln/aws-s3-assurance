@@ -8,6 +8,7 @@ public class AwsStorageProperties {
     private String region = "us-east-2";
     private final S3Properties s3 = new S3Properties();
     private final DynamoDbProperties dynamodb = new DynamoDbProperties();
+    private final SqsProperties sqs = new SqsProperties();
 
     public String getRegion() {
         return region;
@@ -23,6 +24,10 @@ public class AwsStorageProperties {
 
     public DynamoDbProperties getDynamodb() {
         return dynamodb;
+    }
+
+    public SqsProperties getSqs() {
+        return sqs;
     }
 
     public static class S3Properties {
@@ -46,6 +51,18 @@ public class AwsStorageProperties {
 
         public void setTableName(String tableName) {
             this.tableName = tableName;
+        }
+    }
+
+    public static class SqsProperties {
+        private String queueUrl = "";
+
+        public String getQueueUrl() {
+            return queueUrl;
+        }
+
+        public void setQueueUrl(String queueUrl) {
+            this.queueUrl = queueUrl;
         }
     }
 }
